@@ -19,12 +19,11 @@ class TestInitialization(unittest.TestCase):
     def test_brain_init(self):
         from core.brain import ChibiBrain
         brain = ChibiBrain()
-        self.assertEqual(brain.reasoning_model, "qwen3.5:4b")
+        self.assertEqual(brain.reasoning_model, "qwen:4b")
 
     def test_memory_init(self):
         from core.memory import ChibiMemory
-        # Use a temporary memory path for testing if possible,
-        # but here we just check if it initializes.
+        # Use a temporary memory path for testing
         memory = ChibiMemory(memory_path="tests/test_memory")
         self.assertTrue(os.path.exists("tests/test_memory"))
 

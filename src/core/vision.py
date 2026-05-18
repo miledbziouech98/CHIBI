@@ -1,6 +1,8 @@
 import pyautogui
 import cv2
 import numpy as np
+import subprocess
+import shutil
 
 try:
     import pygetwindow as gw
@@ -10,17 +12,26 @@ except (ImportError, NotImplementedError):
 
 class ChibiVision:
     def __init__(self):
-        pass
+        self.has_xdotool = shutil.which("xdotool") is not None
 
     def get_active_window(self):
         if HAS_GW:
             try:
-                return gw.getActiveWindow().title
+                win = gw.getActiveWindow()
+                return win.title if win else "Desktop"
             except:
-                return "Unknown"
-        else:
-            # Fallback for Linux or when pygetwindow is unavailable
-            return "Active Window (Linux Fallback)"
+                pass
+
+        if self.has_xdotool:
+            try:
+                # Get the active window ID and then its name
+                window_id = subprocess.check_output(["xdotool", "getactivewindow"]).decode().strip()
+                window_name = subprocess.check_output(["xdotool", "getwindowname", window_id]).decode().strip()
+                return window_name
+            except:
+                return "Desktop (xdotool failed)"
+
+        return "Active Window (Generic Fallback)"
 
     def take_screenshot(self):
         try:
