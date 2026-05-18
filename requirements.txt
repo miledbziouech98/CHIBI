@@ -1,0 +1,8 @@
+PyQt6
+opencv-python-headless
+pyautogui
+chromadb
+ollama
+pygetwindow
+requests
+python-dotenv

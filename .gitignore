@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# AI/Memory
+memory/chroma/
+*.sqlite3
+
+# IDEs
+.vscode/
+.idea/
+
+# UI/Automation
+*.log
+verification/
+verify_ui.py
