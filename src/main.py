@@ -2,12 +2,16 @@ import sys
 import threading
 import time
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import pyqtSignal, QObject
 from ui.overlay import ChibiOverlay
 from core.brain import ChibiBrain
 from core.memory import ChibiMemory
 from core.vision import ChibiVision
 from core.action import ChibiAction
 from core.voice import ChibiVoice
+
+class ChibiSignals(QObject):
+    update_state = pyqtSignal(str)
 
 class ChibiApp:
     def __init__(self):
@@ -19,6 +23,9 @@ class ChibiApp:
         self.action = ChibiAction()
         self.voice = ChibiVoice()
 
+        self.signals = ChibiSignals()
+        self.signals.update_state.connect(self.overlay.renderer.set_state)
+
         self.is_running = True
         self.thought_thread = threading.Thread(target=self.reasoning_loop, daemon=True)
 
@@ -29,22 +36,33 @@ class ChibiApp:
                 # 1. Environmental Awareness
                 active_window = self.vision.get_active_window()
 
-                # 2. Reasoning Loop
-                prompt = f"I am observing the desktop. The active window is '{active_window}'. What should I reflect on or do right now? Keep it brief."
+                # 2. Memory Retrieval (Contextual awareness)
+                past_context = ""
+                relevant_memories = self.memory.retrieve_relevant(f"Activity in {active_window}")
+                if relevant_memories and 'documents' in relevant_memories:
+                    past_context = "\n".join(relevant_memories['documents'][0])
+
+                # 3. Reasoning Loop
+                prompt = f"I am observing the desktop. The active window is '{active_window}'."
+                if past_context:
+                    prompt += f"\nRelevant past thoughts:\n{past_context}"
+                prompt += "\nWhat should I reflect on or do right now? Keep it brief."
+
                 thought = self.brain.query(prompt)
 
-                # 3. Memory Persistence
-                self.memory.save_thought("Daily Reflection", thought, tags=["reflection", "environment"])
+                # 4. Memory Persistence
+                self.memory.save_thought("Daily Reflection", thought, tags=["reflection", "environment", active_window])
 
-                # 4. Action & Body Update
+                # 5. Action & Body Update
                 print(f"Thought: {thought}")
-                # For now, just blink or look like thinking
-                self.overlay.renderer.set_state("talking")
-                # self.voice.speak(thought) # Optional: only speak if important
-                time.sleep(2)
-                self.overlay.renderer.set_state("idle")
 
-                # Wait before next cycle to save resources (important for 8GB RAM)
+                # Use signal to update UI state safely
+                self.signals.update_state.emit("talking")
+                # self.voice.speak(thought)
+                time.sleep(2)
+                self.signals.update_state.emit("idle")
+
+                # Wait before next cycle
                 time.sleep(30)
             except Exception as e:
                 print(f"Error in reasoning loop: {e}")

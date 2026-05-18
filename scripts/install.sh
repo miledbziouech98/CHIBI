@@ -12,19 +12,21 @@ fi
 mkdir -p bin/piper
 mkdir -p assets
 
-# Download Piper TTS if not present
-if [ ! -f "bin/piper/piper" ]; then
-    echo "Downloading Piper TTS engine..."
-    # Using a stable release URL for Linux x86_64
-    curl -L https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_amd64.tar.gz -o bin/piper.tar.gz
-    tar -xzf bin/piper.tar.gz -C bin/piper --strip-components=1
-    rm bin/piper.tar.gz
+# Download Piper TTS if not present (Linux only for now in script)
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [ ! -f "bin/piper/piper" ]; then
+        echo "Downloading Piper TTS engine (Linux)..."
+        curl -L https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_amd64.tar.gz -o bin/piper.tar.gz
+        tar -xzf bin/piper.tar.gz -C bin/piper --strip-components=1
+        rm bin/piper.tar.gz
+    fi
+elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    echo "Windows detected. Piper TTS binary download skipped (please download manually if needed or use espeak)."
 fi
 
-# Download a high-quality female voice model for "Chibi" sound
+# Download a high-quality female voice model
 if [ ! -f "assets/voice_model.onnx" ]; then
     echo "Downloading Chibi voice model..."
-    # Using a high-quality en_US female model
     curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx -o assets/voice_model.onnx
     curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx.json -o assets/voice_model.onnx.json
 fi
@@ -36,18 +38,19 @@ ollama pull codellama:7b
 
 # Create virtual environment
 echo "Creating virtual environment..."
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv venv || python -m venv venv
+
+# OS-specific activation
+if [ -d "venv/Scripts" ]; then
+    echo "Activating Windows virtual environment..."
+    source venv/Scripts/activate
+else
+    echo "Activating Linux/macOS virtual environment..."
+    source venv/bin/activate
+fi
 
 # Install dependencies
 echo "Installing dependencies..."
 pip install -r requirements.txt
-
-# Check for audio player
-if ! command -v aplay &> /dev/null
-then
-    echo "Warning: 'aplay' not found. Voice playback might fail."
-    echo "Install with: sudo apt-get install alsa-utils"
-fi
 
 echo "Installation complete!"
