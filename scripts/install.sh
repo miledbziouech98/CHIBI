@@ -1,6 +1,15 @@
 #!/bin/bash
 echo "Setting up CHIBI environment..."
 
+# Windows check in bash
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    echo "--------------------------------------------------------"
+    echo "WARNING: You are running a Linux script on Windows."
+    echo "If you get 'Permission Denied' or 'venv' errors, please"
+    echo "run 'install.bat' from a standard Command Prompt instead."
+    echo "--------------------------------------------------------"
+fi
+
 # Check if ollama is installed
 if ! command -v ollama &> /dev/null
 then
@@ -20,8 +29,6 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         tar -xzf bin/piper.tar.gz -C bin/piper --strip-components=1
         rm bin/piper.tar.gz
     fi
-elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    echo "Windows detected. Piper TTS binary download skipped (please download manually if needed or use espeak)."
 fi
 
 # Download a high-quality female voice model

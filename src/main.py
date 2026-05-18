@@ -58,7 +58,7 @@ class ChibiApp:
 
                 # Use signal to update UI state safely
                 self.signals.update_state.emit("talking")
-                # self.voice.speak(thought)
+                self.voice.speak(thought)
                 time.sleep(2)
                 self.signals.update_state.emit("idle")
 

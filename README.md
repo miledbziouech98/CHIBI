@@ -7,33 +7,37 @@ CHIBI is a lightweight, autonomous desktop companion AI designed for local execu
 - **Persistent Memory:** Stores thoughts and goals in Markdown files (Obsidian compatible) and uses ChromaDB for semantic retrieval.
 - **Desktop Awareness:** Tracks active windows and can interact with the desktop using PyAutoGUI.
 - **Transparent UI:** A PyQt6-based overlay that sits on top of your desktop.
-- **High-Quality Voice:** Integrated Piper TTS with a friendly female voice, optimized for a "chibi" feel.
+- **High-Quality Voice:** Integrated Piper TTS with a friendly female voice.
 
 ## Prerequisites
 - [Ollama](https://ollama.com/) (Must be installed and running)
-- System dependencies for audio and UI (Linux):
-  ```bash
-  sudo apt-get install espeak alsa-utils libxcb-cursor0
-  ```
+- System dependencies (Linux): `sudo apt-get install espeak alsa-utils libxcb-cursor0 xdotool`
 
 ## Installation
-1. Run the installation script:
-   ```bash
-   bash scripts/install.sh
-   ```
-   *This will pull models and download the Piper TTS engine (approx. 200MB).*
+
+### Windows (Recommended)
+1. Double-click **`install.bat`** in the root folder.
+2. If it fails with "Permission Denied", right-click it and select **"Run as Administrator"**.
+
+### Linux / Git Bash
+1. Run: `bash scripts/install.sh`
 
 ## Usage
-Start CHIBI by running:
-```bash
-bash scripts/start.sh
-```
+- **Windows:** Double-click **`start.bat`**.
+- **Linux:** Run `bash scripts/start.sh`.
+
+## Troubleshooting (Windows)
+- **"Microsoft Store opens" or "Python not found":**
+  1. Open Windows Start menu and type **"App execution aliases"**.
+  2. Find **"python.exe"** and **"python3.exe"** and turn them **OFF**.
+  3. Re-run `install.bat`.
+- **"Permission Denied" in Git Bash:**
+  Git Bash sometimes has issues with file permissions. We highly recommend using **`install.bat`** in a standard Command Prompt or PowerShell as Administrator for the best experience.
+- **"venv/bin/activate: No such file":**
+  This happens when running the Linux script on Windows. Always use `.bat` files on Windows.
 
 ## Project Structure
 - `src/`: Source code
-  - `ui/`: PyQt6 overlay and rendering
-  - `core/`: Brain, Memory, Vision, Action, and Voice modules
-- `assets/`: Visual assets (SVG, images) and voice models
-- `memory/`: Obsidian-compatible memory vault
-- `scripts/`: Install and start scripts
-- `bin/`: Local binaries (Piper TTS)
+- `assets/`: Character design (SVG) and Voice models
+- `memory/`: Obsidian vault
+- `scripts/`: Platform-specific scripts
