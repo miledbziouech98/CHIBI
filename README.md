@@ -1,17 +1,18 @@
-# CHIBI - Autonomous Desktop Companion AI
+# Yozu - Autonomous Desktop Companion AI
 
-CHIBI is a lightweight, autonomous desktop companion AI designed for local execution. It features a chibi anime aesthetic and a "Second Brain" memory system integrated with Obsidian.
+Yozu is a lightweight, autonomous desktop companion AI designed for local execution. It features a male chibi anime aesthetic and a "Second Brain" memory system integrated with Obsidian.
 
 ## Features
-- **Modular Cognition:** Uses Qwen 4B for reasoning and Code Llama 7B for coding.
-- **Persistent Memory:** Stores thoughts and goals in Markdown files (Obsidian compatible) and uses ChromaDB for semantic retrieval.
-- **Desktop Awareness:** Tracks active windows and can interact with the desktop using PyAutoGUI.
-- **Transparent UI:** A PyQt6-based overlay that sits on top of your desktop.
-- **High-Quality Voice:** Integrated Piper TTS with a friendly female voice.
+- **Remote Brain:** Chat with Yozu via Telegram remotely.
+- **Workflow Automation:** Integrated with n8n for autonomous task creation.
+- **PC Interaction:** Uses Model Context Protocol (MCP) to interact with apps.
+- **Modular Cognition:** Uses local, uncensored models (4B for reasoning, 7B for coding).
+- **Persistent Memory:** Stores thoughts in Obsidian-compatible Markdown and ChromaDB.
+- **High-Quality Voice:** Integrated Kokoro TTS for a high-quality chibi voice.
 
 ## Prerequisites
 - [Ollama](https://ollama.com/) (Must be installed and running)
-- System dependencies (Linux): `sudo apt-get install espeak alsa-utils libxcb-cursor0 xdotool`
+- System dependencies (Arch Linux / CachyOS): `sudo pacman -S espeak-ng alsa-utils xdotool`
 
 ## Installation
 
@@ -24,7 +25,7 @@ CHIBI is a lightweight, autonomous desktop companion AI designed for local execu
 
 ## Usage
 - **Windows:** Double-click **`start.bat`**.
-- **Linux:** Run `bash scripts/start.sh`.
+- **Linux / CachyOS:** Run `bash scripts/start.sh`.
 
 ## Troubleshooting (Windows)
 - **"Microsoft Store opens" or "Python not found":**

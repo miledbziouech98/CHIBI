@@ -1,6 +1,6 @@
 import pyautogui
 
-class ChibiAction:
+class YozuAction:
     def __init__(self):
         pyautogui.FAILSAFE = True
 

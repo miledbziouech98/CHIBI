@@ -1,8 +1,13 @@
 PyQt6
-opencv-python-headless
+opencv-python
 pyautogui
 chromadb
 ollama
 pygetwindow
 requests
 python-dotenv
+python-telegram-bot
+mcp
+soundfile
+sounddevice
+numpy

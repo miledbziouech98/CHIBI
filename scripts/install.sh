@@ -1,13 +1,10 @@
 #!/bin/bash
-echo "Setting up CHIBI environment..."
+echo "Setting up Yozu environment..."
 
-# Windows check in bash
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    echo "--------------------------------------------------------"
-    echo "WARNING: You are running a Linux script on Windows."
-    echo "If you get 'Permission Denied' or 'venv' errors, please"
-    echo "run 'install.bat' from a standard Command Prompt instead."
-    echo "--------------------------------------------------------"
+# Detect CachyOS/Arch
+if [ -f /etc/arch-release ]; then
+    echo "Arch Linux / CachyOS detected. Ensuring system dependencies..."
+    sudo pacman -S --needed python python-pip espeak-ng alsa-utils xdotool portaudio opencv
 fi
 
 # Check if ollama is installed
@@ -17,31 +14,16 @@ then
     exit 1
 fi
 
-# Setup bin directory
-mkdir -p bin/piper
+# Setup directory structure
 mkdir -p assets
+mkdir -p memory
 
-# Download Piper TTS if not present (Linux only for now in script)
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    if [ ! -f "bin/piper/piper" ]; then
-        echo "Downloading Piper TTS engine (Linux)..."
-        curl -L https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_amd64.tar.gz -o bin/piper.tar.gz
-        tar -xzf bin/piper.tar.gz -C bin/piper --strip-components=1
-        rm bin/piper.tar.gz
-    fi
-fi
-
-# Download a high-quality female voice model
-if [ ! -f "assets/voice_model.onnx" ]; then
-    echo "Downloading Chibi voice model..."
-    curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx -o assets/voice_model.onnx
-    curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx.json -o assets/voice_model.onnx.json
-fi
-
-# Pull Ollama models
-echo "Pulling Ollama models..."
-ollama pull qwen:4b
-ollama pull codellama:7b
+# Pull Ollama models (Uncensored versions)
+echo "Pulling Yozu's models..."
+# Dolphin is a popular uncensored series. Llama 3.2 3B is lightweight.
+ollama pull dolphin-llama3:8b-v2.9-q4_K_M # Reasoning (Uncensored)
+ollama pull deepseek-coder:6.7b-instruct-q4_K_M # Coder (Better for 8GB than v2 Lite)
+ollama pull llava:7b-v1.6-mistral-q4_K_M # Vision (Quantized)
 
 # Create virtual environment
 echo "Creating virtual environment..."
