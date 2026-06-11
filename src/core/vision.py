@@ -10,7 +10,7 @@ try:
 except (ImportError, NotImplementedError):
     HAS_GW = False
 
-class ChibiVision:
+class YozuVision:
     def __init__(self):
         self.has_xdotool = shutil.which("xdotool") is not None
 
@@ -50,3 +50,25 @@ class ChibiVision:
         threshold = 0.8
         loc = np.where(res >= threshold)
         return list(zip(*loc[::-1]))
+
+    def describe_screen(self, brain):
+        """Use a vision model to describe the current screen."""
+        screenshot_path = "temp_screenshot.jpg"
+        cv2.imwrite(screenshot_path, self.take_screenshot())
+
+        # This requires the vision model to be loaded in Ollama
+        prompt = "Describe what you see on this desktop screen. Focus on open apps and content."
+        try:
+            import ollama
+            with open(screenshot_path, 'rb') as f:
+                response = ollama.generate(
+                    model=brain.vision_model,
+                    prompt=prompt,
+                    images=[f.read()]
+                )
+            return response['response']
+        except Exception as e:
+            return f"Vision processing failed: {e}"
+        finally:
+            if os.path.exists(screenshot_path):
+                os.remove(screenshot_path)

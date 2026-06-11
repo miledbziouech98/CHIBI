@@ -3,34 +3,65 @@ import subprocess
 import shutil
 import platform
 
-class ChibiVoice:
-    def __init__(self, engine="piper"):
+class YozuVoice:
+    def __init__(self, engine="kokoro"):
         self.engine = engine
         self.os_type = platform.system()
         self.base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-        self.piper_path = os.path.join(self.base_dir, "bin/piper/piper")
-        if self.os_type == "Windows":
-             self.piper_path += ".exe"
 
-        self.model_path = os.path.join(self.base_dir, "assets/voice_model.onnx")
-        self.config_path = self.model_path + ".json"
-
+        # Kokoro specific setup (placeholder for actual kokoro integration)
         self.enabled = self._check_engine()
 
     def _check_engine(self):
-        if self.engine == "piper":
+        if self.engine == "kokoro":
+            try:
+                import kokoro
+                return True
+            except ImportError:
+                return False
+        elif self.engine == "piper":
+            self.piper_path = os.path.join(self.base_dir, "bin/piper/piper")
+            if self.os_type == "Windows":
+                 self.piper_path += ".exe"
+            self.model_path = os.path.join(self.base_dir, "assets/voice_model.onnx")
             return os.path.exists(self.piper_path) and os.path.exists(self.model_path)
         elif self.engine == "espeak":
             return shutil.which("espeak") is not None
         return False
 
     def speak(self, text):
-        print(f"CHIBI says: {text}")
+        print(f"Yozu says: {text}")
         if not self.enabled:
             print(f"Voice output is disabled ({self.engine} engine or model not found).")
-            return
+            # Fallback to espeak if available
+            if shutil.which("espeak"):
+                self.engine = "espeak"
+                self.enabled = True
+            else:
+                return
 
-        if self.engine == "piper":
+        if self.engine == "kokoro":
+            try:
+                from kokoro import KPipeline
+                import sounddevice as sd
+
+                # Initialize pipeline if not exists
+                if not hasattr(self, 'pipeline'):
+                    self.pipeline = KPipeline(lang_code='a') # 'a' for American English
+
+                print(f"Synthesizing with Kokoro: {text}")
+                generator = self.pipeline(text, voice='af_sky', speed=1, split_pattern=r'\n+')
+
+                for gs, ps, audio in generator:
+                    sd.play(audio, 24000)
+                    sd.wait()
+
+            except Exception as e:
+                print(f"Kokoro Voice output failed: {e}. Falling back to espeak.")
+                self.engine = "espeak"
+                self.speak(text)
+
+        elif self.engine == "piper":
             try:
                 if self.os_type == "Linux":
                     piper_process = subprocess.Popen(
@@ -74,5 +105,5 @@ class ChibiVoice:
                 print(f"Espeak Voice output failed: {e}")
 
 if __name__ == "__main__":
-    voice = ChibiVoice()
-    voice.speak("Hello! I am CHIBI, your cross-platform autonomous desktop companion.")
+    voice = YozuVoice()
+    voice.speak("Hello! I am Yozu, your cross-platform autonomous desktop companion.")

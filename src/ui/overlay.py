@@ -1,9 +1,9 @@
 import sys
 from PyQt6.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QWidget
 from PyQt6.QtCore import Qt, QPoint
-from ui.renderer import ChibiRenderer
+from ui.renderer import YozuRenderer
 
-class ChibiOverlay(QMainWindow):
+class YozuOverlay(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -24,15 +24,15 @@ class ChibiOverlay(QMainWindow):
         self.layout = QVBoxLayout(self.central_widget)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        # Add SVG renderer
-        self.renderer = ChibiRenderer()
+        # Add image renderer
+        self.renderer = YozuRenderer()
         self.layout.addWidget(self.renderer)
 
-        # Set window size to match SVG content (300x300)
+        # Set window size to match content (300x300)
         self.setFixedSize(300, 300)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    overlay = ChibiOverlay()
+    overlay = YozuOverlay()
     overlay.show()
     sys.exit(app.exec())

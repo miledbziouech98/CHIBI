@@ -1,33 +1,49 @@
 import sys
 import threading
 import time
+import asyncio
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import pyqtSignal, QObject
-from ui.overlay import ChibiOverlay
-from core.brain import ChibiBrain
-from core.memory import ChibiMemory
-from core.vision import ChibiVision
-from core.action import ChibiAction
-from core.voice import ChibiVoice
+from ui.overlay import YozuOverlay
+from core.brain import YozuBrain
+from core.memory import YozuMemory
+from core.vision import YozuVision
+from core.action import YozuAction
+from core.voice import YozuVoice
+from core.telegram_bot import YozuTelegramBot
+from core.mcp_server import YozuMCP
+from core.n8n_client import Yozun8n
+from core.media import YozuMediaGenerator
 
-class ChibiSignals(QObject):
+class YozuSignals(QObject):
     update_state = pyqtSignal(str)
 
-class ChibiApp:
+class YozuApp:
     def __init__(self):
         self.app = QApplication(sys.argv)
-        self.overlay = ChibiOverlay()
-        self.brain = ChibiBrain()
-        self.memory = ChibiMemory()
-        self.vision = ChibiVision()
-        self.action = ChibiAction()
-        self.voice = ChibiVoice()
+        self.overlay = YozuOverlay()
+        self.brain = YozuBrain()
+        self.memory = YozuMemory()
+        self.vision = YozuVision()
+        self.action = YozuAction()
+        self.voice = YozuVoice()
+        self.mcp = YozuMCP()
+        self.n8n = Yozun8n()
+        self.media = YozuMediaGenerator()
+        self.telegram = YozuTelegramBot(self.brain, self.memory, voice_callback=self.voice.speak)
 
-        self.signals = ChibiSignals()
+        self.signals = YozuSignals()
         self.signals.update_state.connect(self.overlay.renderer.set_state)
 
         self.is_running = True
         self.thought_thread = threading.Thread(target=self.reasoning_loop, daemon=True)
+        self.telegram_thread = threading.Thread(target=self.start_telegram, daemon=True)
+
+    def start_telegram(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.telegram.start())
+        loop.run_forever()
 
     def reasoning_loop(self):
         print("Starting recursive reasoning loop...")
@@ -43,15 +59,20 @@ class ChibiApp:
                     past_context = "\n".join(relevant_memories['documents'][0])
 
                 # 3. Reasoning Loop
-                prompt = f"I am observing the desktop. The active window is '{active_window}'."
+                prompt = f"I am Yozu, observing the desktop. The active window is '{active_window}'."
                 if past_context:
                     prompt += f"\nRelevant past thoughts:\n{past_context}"
-                prompt += "\nWhat should I reflect on or do right now? Keep it brief."
+                prompt += "\nWhat should I, Yozu, reflect on or do right now? Keep it brief."
 
-                thought = self.brain.query(prompt)
+                # Combine all tool definitions
+                all_tools = self.mcp.get_tool_definitions() + self.n8n.get_tool_definitions()
+                self.tool_instances = {'mcp': self.mcp, 'n8n': self.n8n}
+
+                thought = self.brain.query(prompt, tools=all_tools, tool_instances=self.tool_instances)
+                # If thought indicates tool intent, handle it (query method now handles this internally if configured)
 
                 # 4. Memory Persistence
-                self.memory.save_thought("Daily Reflection", thought, tags=["reflection", "environment", active_window])
+                self.memory.save_thought("Yozu Reflection", thought, tags=["reflection", "environment", active_window])
 
                 # 5. Action & Body Update
                 print(f"Thought: {thought}")
@@ -71,9 +92,10 @@ class ChibiApp:
     def run(self):
         self.overlay.show()
         self.thought_thread.start()
-        print("CHIBI is now active!")
+        self.telegram_thread.start()
+        print("Yozu is now active!")
         sys.exit(self.app.exec())
 
 if __name__ == "__main__":
-    chibi = ChibiApp()
-    chibi.run()
+    yozu = YozuApp()
+    yozu.run()

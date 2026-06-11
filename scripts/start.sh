@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Starting CHIBI..."
+echo "Starting Yozu..."
 
 # OS-specific activation
 if [ -d "venv/Scripts" ]; then
